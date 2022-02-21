@@ -1,0 +1,112 @@
+{# 继承自base #}
+{% extends 'base.html' %}
+
+{# 设置自己的标题 #}
+{% block title %}注册{% endblock %}
+
+{% block body %}
+    <div class="container">
+          <form class="form-horizontal" method="post" action="{{ url_for('user.register') }}">
+                <input type="hidden" class="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-group">
+            <label for="inputname" class="col-sm-2 control-label">用户名</label>
+            <div class="col-sm-10">
+                {# required 必填项设置 #}
+              <input type="text" class="form-control" id="inputname" placeholder="请输入用户名" name="username" required>
+                <span style="color: red; display: none" class="message">用户名已存在</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">密码</label>
+            <div class="col-sm-10">
+              <input type="password" class="form-control" id="inputPassword" placeholder="请输入密码" name="psw" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword1" class="col-sm-2 control-label">确认密码</label>
+            <div class="col-sm-10">
+              <input type="password" class="form-control" id="inputPassword1" placeholder="请再次输入密码" name="againpsw" required>
+              <span class="pswmsg" style="color: red; display: none">两次密码输入不一致</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPhone" class="col-sm-2 control-label">手机号</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="inputPhone" placeholder="请输入手机号" name="phone" required>
+                <span style="color: red; display: none" class="phonemessage">手机号已被注册</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <button type="submit" class="btn btn-default register" >注册</button>
+            </div>
+          </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        {# 获取用户名输入框失去焦点的事件 #}
+        $('#inputname').blur(function (){
+            {# 需要向服务器发送一个请求, 把用户输入的用户名传递给服务器, 服务器查询用户名是否已存在, 返回对应的状态 #}
+            $.ajax({
+                {# 设置请求的路由 #}
+                url:"{{ url_for('user.check_name') }}",
+                {# 请求方式 #}
+                type:'post',
+                {# 传递的数据 #}
+                data: "username=" + $('#inputname').val() + '&csrf_token=' + $('.csrf_token').val(),
+                {# 获取响应结果 #}
+                success: function (result, status){
+                    console.log(result)
+                    if(result.code == 200){
+                        {#$('.message').text('用户名已存在')#}
+                        $('.message').css('display', 'block')
+                        {# 禁止注册按钮使用 #}
+                        $('.register').prop('disabled', true)
+                    } else  {
+                         $('.message').css('display', 'none')
+                         $('.register').prop('disabled', false)
+                    }
+                }
+            })
+        })
+
+        {# 获取用户手机号输入框失去焦点事件 #}
+        $('#inputPhone').blur(function () {
+            {# 向服务器请求判断是否存在该手机号 #}
+            $.ajax({
+                {# 设置请求路由 #}
+                url: "{{ url_for('user.check_phone') }}",
+                type: 'post',
+                data: "phone=" + $('#inputPhone').val() + '&csrf_token=' + $('.csrf_token').val(),
+                {# 获取响应结果 #}
+                success: function (result, status) {
+                    if(result.code == 200){
+                        {#$('.phonemessage').text('手机号已被注册')#}
+                        $('.phonemessage').css('display', 'block')
+                         $('.register').prop('disabled', true)
+                    } else {
+                        $('.phonemessage').css('display', 'none')
+                        $('.register').prop('disabled', false)
+                    }
+                }
+            })
+        })
+        {# 当确认密码失去焦点的时候 需要去校验两次密码是否一致 #}
+        $('#inputPassword1').blur(function () {
+            {# 获取密码输入框的值 和确认密码输入框的值吗看下是否一致 #}
+            var psw1 = $('#inputPassword').val()
+            var psw2 = $('#inputPassword1').val()
+            if(psw1 != psw2){
+                $('.pswmsg').css('display', 'inline')
+                $('.register').prop('disabled', true)
+            } else {
+                $('.pswmsg').css('display', 'none')
+                $('.register').prop('disabled', false)
+            }
+        })
+
+    </script>
+{% endblock %}

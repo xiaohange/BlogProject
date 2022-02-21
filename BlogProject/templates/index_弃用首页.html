@@ -1,0 +1,111 @@
+{# 继承自base #}
+{% extends 'base.html' %}
+
+{# 设置自己的标题 #}
+{% block title %}首页{% endblock %}
+
+{# 自己扩展css的内容 #}
+{% block css %}
+        <style>
+            .box{
+                {# 设置圆角 #}
+                border-radius: 5px;
+                border: 1px solid gray;
+                {# 距离下面间隙 #}
+                margin-bottom: 10px;
+                {# 内容和标签间的间隙 #}
+                padding: 10px 30px;
+            }
+            .thum{
+                font-size: 16px;
+            }
+            {# 设置用户名 #}
+            .user{
+                float: left;
+            }
+            {# 设置点赞 #}
+            .like{
+                float: right;
+                {# 设置鼠标样式 #}
+                cursor: pointer;
+            }
+            .clear{
+                {# 撑起来用户点赞的标签 #}
+                clear: both;
+            }
+        </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        {% if blogs  %}
+            {# 遍历, 获取每个blog #}
+            {% for blog in blogs %}
+                {# 声明变量记录当前登陆者是否点赞了这篇博客, 假设没点赞 #}
+                {%  set islike = {'flag': False} %}
+                {# 对当前博客喜爱者们便利 #}
+                {% for user in blog.like_users %}
+                    {# 判断里面有没有当前session的用户名 #}
+                    {% if session.get('username') == user.username %}
+                        {% if islike.update({'flag': True}) %} {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                <div class="box">
+                    {# 这是标题 #}
+                    <h3 class="title">
+                        <a href="#">{{ blog.title }}</a>
+                    </h3>
+                    {# 内容区 #}
+                    <p class="thum">{{ blog.thum_content }}</p>
+                    <div class="user_like">
+                        <div class="user">
+                            {# 用户名 #}
+                            <span>{{ blog.user.username }}</span>
+                        </div>
+                        {# 只要islike为True 就是点赞过 #}
+                        {% if islike.flag %}
+                                <div class="like" bid="{{ blog.bid }}" islike="{{ islike.flag }}">
+                                 <a href="{{ url_for('blog.unlike') }}?bid={{ blog.bid }}">
+                                    {# 点赞数量. 表示给这个博客点赞的用户个数 blog.like_users|length 获取这个容器数据的个数 #}
+                                    <span style="color: red" class="glyphicon-certificate glyphicon glyphicon-thumbs-up"></span>
+                                    <span>{{ blog.like_users|length }}</span>
+                                </a>
+                             </div>
+                        {% else %}
+                            <div class="like" bid="{{ blog.bid }}" islike="{{ islike.flag }}">
+                                <a href="{{ url_for('blog.like') }}?bid={{ blog.bid }}">
+                                    {# 点赞数量. 表示给这个博客点赞的用户个数 blog.like_users|length 获取这个容器数据的个数 #}
+                                    <span class="glyphicon-certificate glyphicon glyphicon-thumbs-up"></span>
+                                    <span>{{ blog.like_users|length }}</span>
+                                </a>
+                            </div>
+                        {% endif %}
+                        <div class="clear"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h3>当前还没有人发表博客, 快去发布吧~</h3>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{#{% block js %}#}
+    {# 点击了点赞的操作 #}
+{#    <script>#}
+{#        $('.like').click(function () {#}
+{#             发送请求 #}
+{#            $.ajax({#}
+{#                url: '{{ url_for('blog.like' ) }}',#}
+{#                type: 'post',#}
+{#                data: 'bid=' + $('.like').attr('bid') + "&csrf_token=" + '{{ csrf_token() }}',#}
+{#                 等待响应 #}
+{#                success: function (result, status) {#}
+{#                    console.log(result)#}
+{#                }#}
+{##}
+{#            })#}
+{#        })#}
+{#    </script>#}
+{#{% endblock %}#}

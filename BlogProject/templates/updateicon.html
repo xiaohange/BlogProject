@@ -1,0 +1,40 @@
+{# 继承自base #}
+{% extends 'base.html' %}
+
+{# 设置自己的标题 #}
+{% block title %}修改头像{% endblock %}
+
+{% block body %}
+    <div class="container">
+         {# enctype="multipart/form-data" 表示上传图片的数据#}
+        <form action="{{ url_for('user.updateicon') }}" enctype="multipart/form-data" method="post">
+            <input type="hidden" class="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
+              <div class="form-group">
+                <label for="exampleInputFile">修改头像</label>
+                <input type="file" id="exampleInputFile" name="icon">
+                  <img class="iconimage" style="height: 100px" src="{{ url_for('static', filename='icon/default.jpg') }}">
+                <p class="help-block">温馨提示: 上传的头像不能超过5M</p>
+              </div>
+              <button type="submit" class="btn btn-default">上传头像</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        {#  点击选择文件, 选中图片确认后, 标签内容发生变化, 触发了change事件 #}
+        var inputfile = document.getElementById('exampleInputFile');
+        {# 添加事件 #}
+        inputfile.onchange = function () {
+            {# 获取到上传文件的input选中的图片资源 #}
+            var files = inputfile.files;
+            console.log(files)
+            {# 因为只需要上传一张图片, 所以files中只会有一个元素 下标是0#}
+            {# 把上传的图片设置对应的地址, 可以根虎地址定位到这个图片 #}
+            var imgurl = window.URL.createObjectURL(files[0])
+            console.log(imgurl)
+            {# 把地址赋值给img的src #}
+            $('.iconimage').attr('src', imgurl)
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{# 继承自base #}
+{% extends 'base.html' %}
+
+{# 设置自己的标题 #}
+{% block title %}发布博客{% endblock %}
+{% block body %}
+    <div class="container">
+        <form action="{{ url_for('blog.publish') }}" method="post">
+             <input type="hidden" class="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-group">
+            <label for="inputtitle">文章标题</label>
+            <input type="text" class="form-control" id="inputtitle" placeholder="文章标题" name="title" required>
+          </div>
+          <div class="form-group">
+            <label for="inputContent">文章内容</label>
+            <textarea  class="form-control" id="exampleInputPassword1" placeholder="文章内容" style="resize: none; height: 500px" name="content" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-default">发表博客</button>
+        </form>
+    </div>
+{% endblock %}
